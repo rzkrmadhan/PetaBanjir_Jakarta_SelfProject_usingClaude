@@ -1,31 +1,31 @@
 # Peta Banjir Jakarta per Kelurahan
 
-Peta interaktif yang menunjukkan seberapa sering tiap kelurahan di DKI Jakarta kebanjiran selama 2013 sampai 2020, berdasarkan catatan BPBD DKI Jakarta.
+Interactive map yang nunjukin seberapa sering tiap kelurahan di Jakarta kena banjir selama 2013 sampai 2020, berdasarkan data BPBD DKI Jakarta.
 
-**Lihat peta:** buka `index.html` di browser, atau lewat GitHub Pages kalau sudah diaktifkan.
+**Lihat peta:** buka `index.html` di browser, atau lewat GitHub Pages kalau sudah aktif.
 
-## Isi peta
+## Ada apa aja di petanya
 
-- 262 kelurahan di daratan Jakarta (Kepulauan Seribu tidak ditampilkan)
-- Warna = jumlah catatan banjir 2013 sampai 2020, dibagi 5 kelas tetap: 0, 1-5, 6-15, 16-35, 36+
-- Arahkan kursor atau ketuk kelurahan untuk lihat detail, dan cari kelurahan lewat kolom pencarian
-- Daftar 12 kelurahan yang paling sering banjir
+- 262 kelurahan di daratan Jakarta (Kepulauan Seribu nggak ditampilin)
+- Warna = jumlah kejadian banjir 2013 sampai 2020, dibagi jadi 5 class: 0, 1-5, 6-15, 16-35, 36+
+- Hover atau tap kelurahan buat lihat detailnya, plus ada search bar buat cari kelurahan
+- List 12 kelurahan yang paling sering banjir
 
-Tiga teratas: Kampung Melayu (121), Cawang (85), dan Bidara Cina (71). Ketiganya memang sering disebut di laporan banjir BPBD.
+Top 3-nya: Kampung Melayu (121), Cawang (85), dan Bidara Cina (71). Ketiganya memang langganan muncul di laporan banjir BPBD.
 
 ## Data
 
 | Data | Sumber |
 |---|---|
-| Catatan kejadian banjir per RW, 2013 sampai 2020 | BPBD DKI Jakarta lewat [Open Data Jakarta](https://data.jakarta.go.id/dataset/data-kejadian-bencana-banjir-di-provinsi-dki-jakarta-tahun-2020) |
-| Rekap jumlah banjir per kelurahan dan batas kelurahan (OpenStreetMap) | [zulhanandika/dashboard-banjir-jakarta](https://github.com/zulhanandika/dashboard-banjir-jakarta) |
+| Data kejadian banjir per RW, 2013 sampai 2020 | BPBD DKI Jakarta via [Open Data Jakarta](https://data.jakarta.go.id/dataset/data-kejadian-bencana-banjir-di-provinsi-dki-jakarta-tahun-2020) |
+| Rekap jumlah banjir per kelurahan + boundary kelurahan (OpenStreetMap) | [zulhanandika/dashboard-banjir-jakarta](https://github.com/zulhanandika/dashboard-banjir-jakarta) |
 
-File di folder `data/` adalah hasil olahan:
+Output di folder `data/`:
 
-- `banjir_kelurahan_jakarta.csv`: tabel jumlah catatan banjir dan kelasnya, urut dari yang terbanyak
-- `banjir_kelurahan_jakarta.geojson`: batas kelurahan (disederhanakan) plus atribut yang sama
+- `banjir_kelurahan_jakarta.csv`: tabel jumlah kejadian banjir dan class-nya, urut dari yang paling banyak
+- `banjir_kelurahan_jakarta.geojson`: boundary kelurahan (sudah di-simplify) plus atribut yang sama
 
-## Cara bikin ulang
+## Cara run ulang
 
 ```bash
 git clone https://github.com/zulhanandika/dashboard-banjir-jakarta sumber
@@ -33,25 +33,25 @@ pip install geopandas pyogrio openpyxl
 python scripts/prep.py sumber
 ```
 
-Script ini mencocokkan nama kelurahan di tabel dengan peta, menjumlahkan baris ganda, menentukan kelas, lalu menyisipkan data ke `scripts/template.html` jadi `index.html`.
+Script-nya nge-join nama kelurahan di tabel dengan polygon di peta, gabungin baris yang dobel, nentuin class, terus masukin datanya ke `scripts/template.html` jadi `index.html`.
 
-## Pilihan desain
+## Kenapa didesain begini
 
-- **Kelas tetap, bukan natural breaks.** Supaya peta bisa dibandingkan dengan periode lain tanpa batas kelas berubah.
-- **Warna biru berurutan** yang aman untuk buta warna, dan tetap terbaca di mode gelap.
-- **Tanpa peta dasar jalan**, cukup batas kelurahan, supaya halaman ringan dan bisa dibuka tanpa server.
+- **Pakai fixed class, bukan natural breaks (Jenks).** Natural breaks bikin batas class berubah tiap datanya ganti, jadi susah dibandingin. Dengan fixed class, kalau nanti ada peta periode lain, tinggal dijejerin aja.
+- **Color ramp biru yang colorblind-friendly**, dan tetap kebaca di dark mode.
+- **Tanpa basemap jalan**, cukup boundary kelurahan. Biar ringan dan bisa dibuka langsung tanpa server.
 
-## Keterbatasan
+## Limitasi
 
-- Ini data **kejadian masa lalu**, bukan model risiko atau prediksi.
-- Satu kejadian banjir bisa tercatat beberapa kali kalau beberapa RW terdampak, jadi kelurahan yang lebih besar (RW lebih banyak) cenderung punya angka lebih tinggi.
-- Jakarta punya [Indeks Bahaya Banjir](https://data.go.id/dataset/dataset/indeks-bahaya-banjir) resmi per kelurahan (data 2021), tapi aksesnya terbatas, jadi tidak dipakai di sini.
-- Rekap per kelurahan berasal dari olahan pihak ketiga atas data resmi, belum dicocokkan ulang satu per satu dengan data mentah BPBD.
+- Ini data **kejadian yang sudah lewat**, bukan model risiko atau prediksi.
+- Satu kejadian banjir bisa kecatat beberapa kali kalau beberapa RW kena. Jadi kelurahan yang lebih besar (RW-nya lebih banyak) cenderung angkanya lebih tinggi.
+- Jakarta sebenarnya punya [Indeks Bahaya Banjir](https://data.go.id/dataset/dataset/indeks-bahaya-banjir) resmi per kelurahan (data 2021), tapi aksesnya terbatas, jadi nggak dipakai di sini.
+- Rekap per kelurahan diambil dari olahan pihak ketiga atas data resmi, belum dicek ulang satu per satu ke raw data BPBD.
 
-## Tentang proyek ini
+## Tentang project ini
 
-Self-project untuk mencoba alur kerja analisis dan pemetaan dengan bantuan AI ([Claude](https://claude.ai)). Pencarian data, pengolahan, dan pembuatan peta dikerjakan bersama Claude.
+Self-project buat nyobain workflow analisis dan mapping pakai bantuan AI ([Claude](https://claude.ai)). Mulai dari cari data, olah data, sampai bikin petanya dikerjain bareng Claude.
 
 Tools: Python (geopandas, shapely, pandas), D3.js.
 
-Batas kelurahan © kontributor OpenStreetMap, lisensi ODbL.
+Boundary kelurahan © kontributor OpenStreetMap, lisensi ODbL.
