@@ -2,7 +2,9 @@
 
 Interactive map yang nunjukin seberapa sering tiap kelurahan di Jakarta kena banjir selama 2013 sampai 2020, berdasarkan data BPBD DKI Jakarta.
 
-**Lihat peta:** buka `index.html` di browser, atau lewat GitHub Pages kalau sudah aktif.
+![Peta banjir Jakarta per kelurahan](images/peta_banjir_jakarta.png)
+
+**Versi interaktif:** buka `index.html` di browser, atau lewat GitHub Pages kalau sudah aktif. Gambar di atas dibuat pakai `scripts/make_figure.py`.
 
 ## Ada apa aja di petanya
 
