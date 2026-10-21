@@ -1,0 +1,147 @@
+<title>Jakarta Flood Map</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: header strip, then map (left) beside a ranked list (right); stacks on phones */
+:root{
+  --bg:#f5f8fa; --panel:#ffffff; --fg:#14232e; --muted:#5a6b78; --line:#d6e0e6; --edge:#ffffff;
+  --c0:#f1f4f2; --c1:#c6dbef; --c2:#6baed6; --c3:#2b7bba; --c4:#08306b; --hl:#e8590c;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e171d; --panel:#15212a; --fg:#e4edf2; --muted:#93a5b1; --line:#2a3a46; --edge:#0e171d;
+  --c0:#24313a; --c1:#2f5675; --c2:#3f87bd; --c3:#7fb8e3; --c4:#cfe6f7; --hl:#ff8a3d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e171d; --panel:#15212a; --fg:#e4edf2; --muted:#93a5b1; --line:#2a3a46; --edge:#0e171d;
+  --c0:#24313a; --c1:#2f5675; --c2:#3f87bd; --c3:#7fb8e3; --c4:#cfe6f7; --hl:#ff8a3d; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:15px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-block:20px 32px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:18px}
+h1{font-size:1.6rem;font-weight:600;margin:0;text-wrap:balance;letter-spacing:-.01em}
+.sub{color:var(--muted);margin:4px 0 0;max-width:68ch}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;align-items:start}
+@media (max-width:820px){.grid{grid-template-columns:minmax(0,1fr)}}
+.mapbox{background:var(--panel);border:1px solid var(--line);border-radius:8px;position:relative;min-width:0}
+svg#map{display:block;width:100%;height:auto}
+path.kel{stroke:var(--edge);stroke-width:.5;cursor:pointer;transition:opacity .15s}
+path.kel:hover,path.kel.on{stroke:var(--hl);stroke-width:2}
+path.kel:focus{outline:none;stroke:var(--hl);stroke-width:2}
+.legend{position:absolute;left:12px;bottom:12px;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:12px}
+.legend b{display:block;font-weight:600;margin-bottom:4px}
+.legend .row{display:flex;align-items:center;gap:8px}
+.sw{width:16px;height:12px;border-radius:2px;border:1px solid var(--line)}
+.legend .num{font-family:var(--mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.tip{position:absolute;pointer-events:none;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.15);max-width:220px}
+.tip .big{font-family:var(--mono);font-size:1.2rem;font-weight:500}
+.tip .m{color:var(--muted);font-size:12px}
+aside{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;min-width:0}
+aside h2{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 8px;font-weight:600}
+label{font-size:13px;color:var(--muted)}
+input#q{width:100%;box-sizing:border-box;margin:4px 0 12px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg);font:inherit}
+input#q:focus-visible{outline:2px solid var(--hl);outline-offset:1px}
+ol{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+ol li button{all:unset;box-sizing:border-box;width:100%;display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:8px;align-items:center;padding:5px 6px;border-radius:5px;cursor:pointer}
+ol li button:hover,ol li button:focus-visible{background:var(--bg);outline:1px solid var(--line)}
+.rk{font-family:var(--mono);color:var(--muted);font-size:12px}
+.nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nm small{display:block;color:var(--muted);font-size:11.5px}
+.ct{font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:500}
+.note{font-size:13px;color:var(--muted);max-width:90ch;display:grid;gap:6px}
+.note a{color:inherit}
+.empty{color:var(--muted);font-size:13px;padding:4px 6px}
+@media (prefers-reduced-motion:reduce){path.kel{transition:none}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Where Jakarta floods most often</h1>
+    <p class="sub">Number of flood records per kelurahan (neighborhood), 2013 to 2020, from BPBD DKI Jakarta reports. Darker means flooded more often. Tap or hover a neighborhood for details.</p>
+  </header>
+
+  <div class="grid">
+    <div class="mapbox" id="mapbox">
+      <svg id="map" role="img" aria-label="Map of Jakarta neighborhoods colored by number of flood records"></svg>
+      <div class="legend" id="legend"></div>
+      <div class="tip" id="tip" hidden></div>
+    </div>
+
+    <aside>
+      <h2>Most often flooded</h2>
+      <label for="q">Find a neighborhood</label>
+      <input id="q" type="search" placeholder="e.g. Kampung Melayu" autocomplete="off">
+      <ol id="list"></ol>
+    </aside>
+  </div>
+
+  <div class="note">
+    <div><b>How to read this.</b> This shows past flooding, not a forecast. A count is the number of flood records BPBD logged for that kelurahan (one flood can create several records if several RW were hit). Bigger neighborhoods with more RW can get higher counts. Kepulauan Seribu is not shown.</div>
+    <div><b>Classes</b> are fixed cut points (0, 1 to 5, 6 to 15, 16 to 35, 36 and up) so the map can be compared with other years later. Colors are colorblind safe.</div>
+    <div><b>Sources.</b> Flood records: BPBD DKI Jakarta via <a href="https://data.jakarta.go.id/dataset/data-kejadian-bencana-banjir-di-provinsi-dki-jakarta-tahun-2020" target="_blank" rel="noopener">Open Data Jakarta</a>, combined per kelurahan in <a href="https://github.com/zulhanandika/dashboard-banjir-jakarta" target="_blank" rel="noopener">dashboard-banjir-jakarta</a>. Boundaries: OpenStreetMap (same repo). Map projection: Web Mercator.</div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script>/*DATA*/</script>
+<script>
+(function(){
+  const LABELS=['0','1 to 5','6 to 15','16 to 35','36 and up'];
+  const NAMES=['None recorded','Low','Moderate','High','Very high'];
+  const col=i=>`var(--c${i})`;
+  const W=900,H=760;
+  const svg=d3.select('#map').attr('viewBox',`0 0 ${W} ${H}`);
+  const proj=d3.geoMercator().fitExtent([[10,10],[W-10,H-10]],FLOOD);
+  const path=d3.geoPath(proj);
+  const tip=document.getElementById('tip'), box=document.getElementById('mapbox');
+  const feats=FLOOD.features;
+  const paths=svg.append('g').selectAll('path').data(feats).join('path')
+    .attr('class','kel').attr('d',path).attr('tabindex',0)
+    .attr('fill',d=>col(d.properties.cls))
+    .attr('aria-label',d=>`${d.properties.kel}: ${d.properties.n} flood records`);
+
+  function show(d,x,y){
+    const p=d.properties;
+    tip.innerHTML=`<div><b>${p.kel}</b></div><div class="m">${p.kec}, ${p.kota}</div><div class="big">${p.n}</div><div class="m">flood records, 2013 to 2020 · ${NAMES[p.cls]}</div>`;
+    tip.hidden=false;
+    const r=box.getBoundingClientRect();
+    let lx=x-r.left+14, ly=y-r.top+14;
+    if(lx+230>r.width) lx=x-r.left-234;
+    if(ly+110>r.height) ly=y-r.top-114;
+    tip.style.left=Math.max(4,lx)+'px'; tip.style.top=Math.max(4,ly)+'px';
+  }
+  function select(d){
+    paths.classed('on',x=>x===d);
+    paths.filter(x=>x===d).raise();
+    const c=path.centroid(d), r=svg.node().getBoundingClientRect();
+    show(d, r.left+c[0]*r.width/W, r.top+c[1]*r.height/H);
+  }
+  paths.on('mousemove',(e,d)=>show(d,e.clientX,e.clientY))
+       .on('mouseleave',()=>{tip.hidden=true})
+       .on('click',(e,d)=>select(d))
+       .on('focus',(e,d)=>select(d))
+       .on('blur',()=>{tip.hidden=true;paths.classed('on',false)});
+
+  // legend with counts per class
+  const cnt=[0,0,0,0,0]; feats.forEach(f=>cnt[f.properties.cls]++);
+  document.getElementById('legend').innerHTML='<b>Flood records</b>'+
+    [4,3,2,1,0].map(i=>`<div class="row"><span class="sw" style="background:${col(i)}"></span><span>${LABELS[i]}</span><span class="num">(${cnt[i]})</span></div>`).join('');
+
+  // ranked list
+  const sorted=feats.slice().sort((a,b)=>b.properties.n-a.properties.n);
+  const list=document.getElementById('list');
+  function render(q){
+    q=(q||'').trim().toLowerCase();
+    const rows=q? sorted.filter(f=>(f.properties.kel+' '+f.properties.kec).toLowerCase().includes(q)).slice(0,12) : sorted.slice(0,12);
+    list.innerHTML='';
+    if(!rows.length){list.innerHTML='<li class="empty">No neighborhood matches that name.</li>';return}
+    rows.forEach(f=>{
+      const p=f.properties, li=document.createElement('li'), b=document.createElement('button');
+      b.innerHTML=`<span class="rk">${sorted.indexOf(f)+1}</span><span class="nm">${p.kel}<small>${p.kec}, ${p.kota}</small></span><span class="ct">${p.n}</span>`;
+      b.addEventListener('click',()=>select(f));
+      li.appendChild(b); list.appendChild(li);
+    });
+  }
+  render('');
+  document.getElementById('q').addEventListener('input',e=>render(e.target.value));
+})();
+</script>
